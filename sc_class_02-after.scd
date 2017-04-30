@@ -17,6 +17,11 @@ SynthDef.new(\limiter, {|in=0, out=0|
 s.meter; // brings up input and output dB meters
 s.plotTree; // brings up the node tree
 
+
+// Synth.new if nothing is happening yet
+y = Synth.new(\limiter);
+
+// Synth.after if the audio is already running.
 y = Synth.after(x, \limiter); // make sure the limiter is the LAST item on the node tree
 y.free;
 
@@ -42,7 +47,7 @@ SynthDef.new(\edoRamp, {
 
 	signal = Pulse.ar(stepFreq, pulseWidth) * env;
 
-	Out.ar(Rand(0,1).round, signal);
+	Out.ar(Rand(0,1).round, signal); // Pan2
 
 	}).add;
 )
@@ -52,9 +57,27 @@ x.set(\t_gate,1);
 SCDoc.renderAll();
 
 
-x = Synth.new(\edoRamp,[\edo, 7]);
+x = Synth.new(\edoRamp,[\edo, 22, \ramp, 2]);
 
 x.free;
+
+(
+SynthDef.new(\filtTest, {
+	|freq=110,amp=0.5|
+	var signal;
+
+	freq = freq + (SinOsc.kr(freq*6.02) * freq * 0.1);
+
+	signal = Saw.ar(freq) * amp;
+
+
+	Out.ar([0,1], signal);
+
+	}).add;
+
+)
+
+x = Synth.new(\filtTest);
 
 /* UGens to research:
 

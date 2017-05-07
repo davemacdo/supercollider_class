@@ -1,3 +1,27 @@
+s.boot;
+s.meter;
+s.plotTree;
+
+( // Filter
+SynthDef.new(\limiter, {|in=0, out=0|
+	var sig_in, leaked, limited;
+
+	sig_in = In.ar(in, 2); // Bring signal stream into synth
+	leaked = LeakDC.ar(sig_in); // eliminate any built up DC offset
+	limited = Limiter.ar(leaked, 0.99);  // signal maxes out JUST below unity gain
+
+	ReplaceOut.ar(out, limited); // ReplaceOut so that the resulting signal overwrites the previous
+}).add;
+)
+
+// Synth.new if nothing is happening yet
+y = Synth.new(\limiter);
+
+// Synth.after if the audio is already running.
+y = Synth.after(x, \limiter); // make sure the limiter is the LAST item on the node tree
+y.free;
+
+
 (
 SynthDef.new(\dm_thick_texture, {
 	|out=0, freq=55, detune=0|
@@ -22,6 +46,9 @@ x.free;
 
 e = Pgauss.new(400,10).poll(0.2);
 e.asStream.nextN(500);
+
+x = {SinOsc.ar(Pgauss.new(200,0)) * 0.8}.play;
+x.free
 
 /*
 V. In-Class Assignment:
